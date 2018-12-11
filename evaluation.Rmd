@@ -1,0 +1,199 @@
+---
+title: "Open-Source Participation Survey Overview (Task 10-2)"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  html_notebook: default
+---
+
+```{r setup, echo=FALSE}
+source("./dataImport.R")
+library(lattice)
+require(ggplot2)
+require(reshape2)
+require(plyr)
+
+plot.pollutant = function(data, pollutant.name, month="00", day="00", title="") {
+  df = data[c("dtPosix", pollutant.name)]
+  df = melt(df, id.vars = 'dtPosix', variable.name = "pollutant", value.name = "value")
+  
+  if (day == "00" & month != "00")
+    df = subset(df, format.Date(dtPosix, "%m")==month)
+  else if (day != "00" & month != "00")
+    df = subset(df, format.Date(dtPosix, "%m")==month & format.Date(dtPosix, "%d")==day)
+  
+  plot <- ggplot(df, aes(dtPosix,value)) + geom_line(aes(colour = pollutant))
+  plot + ggtitle(title)
+}  
+```
+
+
+```{r}
+# importing our data
+data = data.import()
+
+head(data)
+```
+
+
+## Overview
+```{r}
+summary(data)
+```
+
+## pm10 over the year
+
+```{r}
+pollutant = "pm10.all"
+
+plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak")
+  
+plot.pollutant(data, pollutant, month = "01")
+plot.pollutant(data, pollutant, month = "02")
+plot.pollutant(data, pollutant, month = "03")
+plot.pollutant(data, pollutant, month = "04")
+plot.pollutant(data, pollutant, month = "05")
+plot.pollutant(data, pollutant, month = "06")
+plot.pollutant(data, pollutant, month = "07")
+plot.pollutant(data, pollutant, month = "08")
+plot.pollutant(data, pollutant, month = "09")
+plot.pollutant(data, pollutant, month = "10")
+plot.pollutant(data, pollutant, month = "11")
+plot.pollutant(data, pollutant, month = "12")
+```
+
+
+## chb over the year
+```{r}
+pollutant = "chb.all"
+
+plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak")
+  
+plot.pollutant(data, pollutant, month = "01")
+plot.pollutant(data, pollutant, month = "02")
+plot.pollutant(data, pollutant, month = "03")
+plot.pollutant(data, pollutant, month = "04")
+plot.pollutant(data, pollutant, month = "05")
+plot.pollutant(data, pollutant, month = "06")
+plot.pollutant(data, pollutant, month = "07")
+plot.pollutant(data, pollutant, month = "08")
+plot.pollutant(data, pollutant, month = "09")
+plot.pollutant(data, pollutant, month = "10")
+plot.pollutant(data, pollutant, month = "11")
+plot.pollutant(data, pollutant, month = "12")
+```
+
+## CHT over the year
+```{r}
+pollutant = "cht.all"
+  
+plot.pollutant(data, pollutant, month = "01")
+plot.pollutant(data, pollutant, month = "02")
+plot.pollutant(data, pollutant, month = "03")
+plot.pollutant(data, pollutant, month = "04")
+plot.pollutant(data, pollutant, month = "05")
+plot.pollutant(data, pollutant, month = "06")
+plot.pollutant(data, pollutant, month = "07")
+plot.pollutant(data, pollutant, month = "08")
+plot.pollutant(data, pollutant, month = "09")
+plot.pollutant(data, pollutant, month = "10")
+plot.pollutant(data, pollutant, month = "11")
+plot.pollutant(data, pollutant, month = "12")
+```
+
+## CO over the year
+```{r}
+pollutant = "co.all"
+
+plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak")
+  
+plot.pollutant(data, pollutant, month = "01")
+plot.pollutant(data, pollutant, month = "02")
+plot.pollutant(data, pollutant, month = "03")
+plot.pollutant(data, pollutant, month = "04")
+plot.pollutant(data, pollutant, month = "05")
+plot.pollutant(data, pollutant, month = "06")
+plot.pollutant(data, pollutant, month = "07")
+plot.pollutant(data, pollutant, month = "08")
+plot.pollutant(data, pollutant, month = "09")
+plot.pollutant(data, pollutant, month = "10")
+plot.pollutant(data, pollutant, month = "11")
+plot.pollutant(data, pollutant, month = "12")
+```
+
+## 5. NOX over the year
+```{r}
+pollutant = "nox.all"
+
+plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak")
+  
+plot.pollutant(data, pollutant, month = "01")
+plot.pollutant(data, pollutant, month = "02")
+plot.pollutant(data, pollutant, month = "03")
+plot.pollutant(data, pollutant, month = "04")
+plot.pollutant(data, pollutant, month = "05")
+plot.pollutant(data, pollutant, month = "06")
+plot.pollutant(data, pollutant, month = "07")
+plot.pollutant(data, pollutant, month = "08")
+plot.pollutant(data, pollutant, month = "09")
+plot.pollutant(data, pollutant, month = "10")
+plot.pollutant(data, pollutant, month = "11")
+plot.pollutant(data, pollutant, month = "12")
+```
+
+## 6. O3 over the year
+```{r}
+pollutant = "o3.all"
+  
+plot.pollutant(data, pollutant, month = "01")
+plot.pollutant(data, pollutant, month = "02")
+plot.pollutant(data, pollutant, month = "03")
+plot.pollutant(data, pollutant, month = "04")
+plot.pollutant(data, pollutant, month = "05")
+plot.pollutant(data, pollutant, month = "06")
+plot.pollutant(data, pollutant, month = "07")
+plot.pollutant(data, pollutant, month = "08")
+plot.pollutant(data, pollutant, month = "09")
+plot.pollutant(data, pollutant, month = "10")
+plot.pollutant(data, pollutant, month = "11")
+plot.pollutant(data, pollutant, month = "12")
+```
+
+## pm10 over the year
+```{r}
+pollutant = "so2.all"
+
+plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak")
+  
+plot.pollutant(data, pollutant, month = "01")
+plot.pollutant(data, pollutant, month = "02")
+plot.pollutant(data, pollutant, month = "03")
+plot.pollutant(data, pollutant, month = "04")
+plot.pollutant(data, pollutant, month = "05")
+plot.pollutant(data, pollutant, month = "06")
+plot.pollutant(data, pollutant, month = "07")
+plot.pollutant(data, pollutant, month = "08")
+plot.pollutant(data, pollutant, month = "09")
+plot.pollutant(data, pollutant, month = "10")
+plot.pollutant(data, pollutant, month = "11")
+plot.pollutant(data, pollutant, month = "12")
+```
+
+## pm10 to wind
+```{r}
+ddply(data,~wind_speed,summarise,pm10.all.mean=mean(pm10.all),sd=sd(pm10.all))
+ggplot(data, aes(wind_speed,pm10.all, group = wind_speed)) + geom_boxplot() + ylim(0, 70) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+
+
+ddply(data,~wind.deg.name,summarise,pm10.all.mean=mean(pm10.all),sd=sd(pm10.all))
+ggplot(data, aes(wind.deg.name,pm10.all, group = wind.deg.name)) + geom_boxplot() + ylim(0, 70) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+
+ddply(data,~wind.deg.name,summarise,wind_speed.mean=mean(wind_speed),sd=sd(wind_speed))
+ggplot(data, aes(wind.deg.name,wind_speed, group = wind.deg.name)) + geom_boxplot() + ylim(0, 15) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+```
+
+
+
+
+
