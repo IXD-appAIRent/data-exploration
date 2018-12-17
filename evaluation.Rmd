@@ -14,8 +14,8 @@ require(ggplot2)
 require(reshape2)
 require(plyr)
 
-plot.pollutant = function(data, pollutant.name, month="00", day="00", title="") {
-  df = data[c("dtPosix", pollutant.name)]
+plot.pollutant = function(data, pollutants, month="00", day="00", title="", yMax=0) {
+  df = data[c("dtPosix", pollutants)]
   df = melt(df, id.vars = 'dtPosix', variable.name = "pollutant", value.name = "value")
   
   if (day == "00" & month != "00")
@@ -23,8 +23,13 @@ plot.pollutant = function(data, pollutant.name, month="00", day="00", title="") 
   else if (day != "00" & month != "00")
     df = subset(df, format.Date(dtPosix, "%m")==month & format.Date(dtPosix, "%d")==day)
   
-  plot <- ggplot(df, aes(dtPosix,value)) + geom_line(aes(colour = pollutant))
-  plot + ggtitle(title)
+  plot <- ggplot(df, aes(dtPosix,value)) + geom_point(aes(colour = pollutant))
+
+  if (yMax != 0) {
+    plot <- plot + coord_cartesian(ylim = c(0, yMax)) 
+  }
+  
+    plot + ggtitle(title)
 }  
 ```
 
@@ -45,11 +50,11 @@ summary(data)
 ## pm10 over the year
 
 ```{r}
-pollutant = "pm10.all"
+pollutant = c("pm10.background", "pm10.traffic", "pm10.suburb")
 
 plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak")
   
-plot.pollutant(data, pollutant, month = "01")
+plot.pollutant(data, pollutant, month = "01", yMax = 150)
 plot.pollutant(data, pollutant, month = "02")
 plot.pollutant(data, pollutant, month = "03")
 plot.pollutant(data, pollutant, month = "04")
@@ -66,7 +71,7 @@ plot.pollutant(data, pollutant, month = "12")
 
 ## chb over the year
 ```{r}
-pollutant = "chb.all"
+pollutant = c("chb.background", "chb.traffic")
 
 plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak")
   
@@ -86,7 +91,7 @@ plot.pollutant(data, pollutant, month = "12")
 
 ## CHT over the year
 ```{r}
-pollutant = "cht.all"
+pollutant = c("cht.background", "cht.traffic")
   
 plot.pollutant(data, pollutant, month = "01")
 plot.pollutant(data, pollutant, month = "02")
@@ -104,7 +109,8 @@ plot.pollutant(data, pollutant, month = "12")
 
 ## CO over the year
 ```{r}
-pollutant = "co.all"
+# there are only traffic sensors for co
+pollutant = c("co.traffic")
 
 plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak")
   
@@ -122,9 +128,9 @@ plot.pollutant(data, pollutant, month = "11")
 plot.pollutant(data, pollutant, month = "12")
 ```
 
-## 5. NOX over the year
+## 5. no2 over the year
 ```{r}
-pollutant = "nox.all"
+pollutant = c("no2.background", "no2.traffic")
 
 plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak")
   
@@ -144,7 +150,7 @@ plot.pollutant(data, pollutant, month = "12")
 
 ## 6. O3 over the year
 ```{r}
-pollutant = "o3.all"
+pollutant = c("o3.background", "o3.traffic", "o3.suburb")
   
 plot.pollutant(data, pollutant, month = "01")
 plot.pollutant(data, pollutant, month = "02")
@@ -160,13 +166,13 @@ plot.pollutant(data, pollutant, month = "11")
 plot.pollutant(data, pollutant, month = "12")
 ```
 
-## pm10 over the year
+## so2 over the year
 ```{r}
-pollutant = "so2.all"
+pollutant = c("so2.background", "so2.traffic")
 
-plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak")
+plot.pollutant(data, pollutant, month = "01", day = "01", title = "1. January with silvester firework peak", yMax = 15)
   
-plot.pollutant(data, pollutant, month = "01")
+plot.pollutant(data, pollutant, month = "01", yMax = 15)
 plot.pollutant(data, pollutant, month = "02")
 plot.pollutant(data, pollutant, month = "03")
 plot.pollutant(data, pollutant, month = "04")
@@ -180,20 +186,107 @@ plot.pollutant(data, pollutant, month = "11")
 plot.pollutant(data, pollutant, month = "12")
 ```
 
-## pm10 to wind
+## wind correlation
 ```{r}
-ddply(data,~wind_speed,summarise,pm10.all.mean=mean(pm10.all),sd=sd(pm10.all))
-ggplot(data, aes(wind_speed,pm10.all, group = wind_speed)) + geom_boxplot() + ylim(0, 70) + stat_summary(fun.y=mean, colour="darkred", geom="point")
 
-
-ddply(data,~wind.deg.name,summarise,pm10.all.mean=mean(pm10.all),sd=sd(pm10.all))
-ggplot(data, aes(wind.deg.name,pm10.all, group = wind.deg.name)) + geom_boxplot() + ylim(0, 70) + stat_summary(fun.y=mean, colour="darkred", geom="point")
-
-ddply(data,~wind.deg.name,summarise,wind_speed.mean=mean(wind_speed),sd=sd(wind_speed))
 ggplot(data, aes(wind.deg.name,wind_speed, group = wind.deg.name)) + geom_boxplot() + ylim(0, 15) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+
+ggplot(data, aes(wind_speed,pm10.all, group = wind_speed)) + geom_boxplot() + ylim(0, 70) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind_speed,co.traffic, group = wind_speed)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind_speed,no2.all, group = wind_speed)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind_speed,so2.all, group = wind_speed)) + geom_boxplot()  + ylim(0, 5)  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind_speed,o3.all, group = wind_speed)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind_speed,chb.all, group = wind_speed)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind_speed,cht.all, group = wind_speed)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+
+ggplot(data, aes(wind.deg.name,pm10.all, group = wind.deg.name)) + geom_boxplot() + ylim(0, 70) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind.deg.name,co.traffic, group = wind.deg.name)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind.deg.name,no2.all, group = wind.deg.name)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind.deg.name,so2.all, group = wind.deg.name)) + geom_boxplot()  + ylim(0, 5) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind.deg.name,o3.all, group = wind.deg.name)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind.deg.name,chb.all, group = wind.deg.name)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(wind.deg.name,cht.all, group = wind.deg.name)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+
+
+
+
 ```
 
 
+## temp correlation
+```{r}
+ggplot(data, aes(temp.c.group, pm10.all, group = temp.c.group)) + geom_boxplot() + ylim(0, 15) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(temp.c.group, co.traffic, group = temp.c.group)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(temp.c.group, no2.all, group = temp.c.group)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(temp.c.group, so2.all, group = temp.c.group)) + geom_boxplot()  + ylim(0, 5) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(temp.c.group, o3.all, group = temp.c.group)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(temp.c.group, chb.all, group = temp.c.group)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(temp.c.group, cht.all, group = temp.c.group)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+```
 
 
+## weather main correlation
+```{r}
+ggplot(data, aes(weather_main, pm10.all, group = weather_main)) + geom_boxplot() + ylim(0, 70) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(weather_main, co.traffic, group = weather_main)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(weather_main, no2.all, group = weather_main)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(weather_main, so2.all, group = weather_main)) + geom_boxplot()  + ylim(0, 5) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(weather_main, o3.all, group = weather_main)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(weather_main, chb.all, group = weather_main)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(weather_main, cht.all, group = weather_main)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+```
+
+## pressure correlation
+```{r}
+ggplot(data, aes(pressure, pm10.all, group = pressure)) + geom_boxplot() + ylim(0, 70) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(pressure, co.traffic, group = pressure)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(pressure, no2.all, group = pressure)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(pressure, so2.all, group = pressure)) + geom_boxplot()  + ylim(0, 5) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(pressure, o3.all, group = pressure)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(pressure, chb.all, group = pressure)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(pressure, cht.all, group = pressure)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+```
+
+## humidity correlation
+
+```{r}
+ggplot(data, aes(humidity, pm10.all, group = humidity)) + geom_boxplot() + ylim(0, 70) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(humidity, co.traffic, group = humidity)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(humidity, no2.all, group = humidity)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(humidity, so2.all, group = humidity)) + geom_boxplot()  + ylim(0, 5) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(humidity, o3.all, group = humidity)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(humidity, chb.all, group = humidity)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(humidity, cht.all, group = humidity)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+```
+
+## clouds correlation
+
+```{r}
+ggplot(data, aes(clouds_all, pm10.all, group = clouds_all)) + geom_boxplot() + ylim(0, 70) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(clouds_all, co.traffic, group = clouds_all)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(clouds_all, no2.all, group = clouds_all)) + geom_boxplot() + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(clouds_all, so2.all, group = clouds_all)) + geom_boxplot()  + ylim(0, 5) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(clouds_all, o3.all, group = clouds_all)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(clouds_all, chb.all, group = clouds_all)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(clouds_all, cht.all, group = clouds_all)) + geom_boxplot()  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+```
+
+## pollutant to pollutant correlations
+
+```{r}
+ggplot(data, aes(co.traffic, pm10.all, group = co.traffic)) + geom_boxplot() + ylim(0, 100) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(no2.all, pm10.all, group = no2.all)) + geom_boxplot() + ylim(0, 100) + xlim(0, 100) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(so2.all, pm10.all, group = so2.all)) + geom_boxplot() + ylim(0, 100) + xlim(0, 15) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(o3.all, pm10.all, group = o3.all)) + geom_boxplot() + ylim(0, 100)  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+
+
+ggplot(data, aes(no2.all, co.traffic, group = no2.all)) + geom_boxplot() + xlim(0, 100) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(so2.all, co.traffic, group = so2.all)) + geom_boxplot() + xlim(0, 15) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(o3.all, co.traffic, group = o3.all)) + geom_boxplot() + ylim(0, 1.5)  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+
+ggplot(data, aes(so2.all, no2.all, group = so2.all)) + geom_boxplot() + xlim(0, 30) + stat_summary(fun.y=mean, colour="darkred", geom="point")
+ggplot(data, aes(o3.all, no2.all, group = o3.all)) + geom_boxplot()   + stat_summary(fun.y=mean, colour="darkred", geom="point")
+
+ggplot(data, aes(o3.all, so2.all, group = o3.all)) + geom_boxplot() + ylim(0, 20)  + stat_summary(fun.y=mean, colour="darkred", geom="point")
+```
 

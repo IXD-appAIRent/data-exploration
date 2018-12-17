@@ -85,11 +85,62 @@ wind.deg.name = function(value) {
   name
 }
 
+temp.c.group = function(value) {
+  name = NA
+  if (is.na(value))
+    name = NA
+  else if (value >= -20 && value <= -18)
+    name = -19
+  else if (value >= -17 && value <= -15)
+    name = -16
+  else if (value >= -14 && value <= -12)
+    name = -13
+  else if (value >= -11 && value <= -9)
+    name = -10
+  else if (value >= -8 && value <= -6)
+    name = -7
+  else if (value >= -5 && value <= -3)
+    name = -4
+  else if (value >= -2 && value <= 0)
+    name = -1
+  else if (value >= 1 && value <= 3)
+    name = 2
+  else if (value >= 4 && value <= 6)
+    name = 5
+  else if (value >= 7 && value <= 9)
+    name = 8
+  else if (value >= 10 && value <= 12)
+    name = 11
+  else if (value >= 13 && value <= 15)
+    name = 14
+  else if (value >= 16 && value <= 18)
+    name = 17
+  else if (value >= 19 && value <= 21)
+    name = 20
+  else if (value >= 22 && value <= 24)
+    name = 23
+  else if (value >= 25 && value <= 27)
+    name = 26
+  else if (value >= 28 && value <= 30)
+    name = 29
+  else if (value >= 31 && value <= 33)
+    name = 32
+  else if (value >= 34 && value <= 36)
+    name = 35
+  else if (value >= 37 && value <= 39)
+    name = 38
+  else if (value >= 40 && value <= 42)
+    name = 41
+  
+  name
+}
 
 
 data.import = function() {
     df = read.table(file = "data/owm_berlin_2017.csv", header = TRUE, sep = ",")
     df$dtPosix = as.POSIXct(df$dt_iso)
+    df$temp.c = df$temp - 273.15
+    df$temp.c.group = sapply(df$temp.c, temp.c.group)
     
     #weekdays
     weekday = factor(as.POSIXlt(df$dtPosix)$wday, levels = (0:6))
